@@ -1,0 +1,7 @@
+default:keyword
+category(whitespace):WS
+category(comment):LINE_COMMENT,BLOCK_COMMENT,DOC_COMMENT
+category(identifier):ID
+category(error):ERRCHAR
+category(default):*BRACE,*PAREN
+block:LBRACE,RBRACE

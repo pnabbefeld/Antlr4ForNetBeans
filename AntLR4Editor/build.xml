@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See harness/README in the NetBeans platform -->
+<!-- for some information on what you could do (e.g. targets to override). -->
+<!-- If you delete this file and reopen the project it will be recreated. -->
+<project name="de.epdv.module.netbeans.editor.antlr4" default="netbeans" basedir=".">
+    <description>Builds, tests, and runs the project de.epdv.module.netbeans.editor.antlr4.</description>
+    <import file="nbproject/build-impl.xml"/>
+
+    <macrodef name="antlr4">
+        <attribute name="package"/>
+        <attribute name="pkgdir"/>
+        <attribute name="source"/>
+        <attribute name="srcdir"/>
+        <sequential>        
+            <java jar="release/modules/ext/antlr-4.7-complete.jar"
+                  failonerror="true"
+            >
+                <arg value="-o"/>
+                <arg value="build/generated-sources/antlr4"/>
+                <arg value="-package"/>
+                <arg value="@{package}"/>
+                <arg value="src/@{srcdir}/@{source}"/>
+            </java>
+            <move todir="src/@{pkgdir}">
+                <fileset dir="build/generated-sources/antlr4/src/@{srcdir}"/>
+            </move>                                
+        </sequential>
+    </macrodef>
+    
+    <target name="create-antlr-files">
+        <antlr4 package="de.epdv.module.netbeans.editor.antlr4.lexer"
+                pkgdir="de/epdv/module/netbeans/editor/antlr4/lexer"
+                srcdir="de/epdv/module/netbeans/editor/antlr4/grammar"
+                source="ANTLRv4Lexer.g4"
+        />
+        <copy file="src/de/epdv/module/netbeans/editor/antlr4/lexer/ANTLRv4Lexer.tokens" todir="build/generated-sources/antlr4/"/>
+        <antlr4 package="de.epdv.module.netbeans.editor.antlr4.parser"
+                pkgdir="de/epdv/module/netbeans/editor/antlr4/parser"
+                srcdir="de/epdv/module/netbeans/editor/antlr4/grammar"
+                source="ANTLRv4Parser.g4"
+        />
+        <taskdef name="CreateTokenEnum" classname="de.epdv.module.netbeans.editor.antlr4.ant.CreateTokenEnum" classpath="/home/peter/NetBeansProjects/Antlr4Integration/AntLR4Editor/build/cluster/modules/de-epdv-module-netbeans-editor-antlr4.jar" />
+        <CreateTokenEnum dir="de/epdv/module/netbeans/editor/antlr4/lexer"
+                         tokens="ANTLRv4Lexer.tokens"
+                         defs="TokenDefs.txt"
+        />
+    </target>
+</project>

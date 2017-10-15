@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: true
+OpenIDE-Module: de.epdv.module.netbeans.editor.antlr4
+OpenIDE-Module-Layer: de/epdv/module/netbeans/editor/antlr4/resources/layer.xml
+OpenIDE-Module-Localizing-Bundle: de/epdv/module/netbeans/editor/antlr4/resources/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+

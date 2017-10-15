@@ -1,0 +1,211 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package de.epdv.module.netbeans.editor.antlr4.lexer;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.misc.Interval;
+import org.netbeans.spi.lexer.LexerInput;
+
+public class AntlrCharStream implements CharStream {
+
+    // <editor-fold defaultstate="collapsed" desc="CharStreamState">
+    private class CharStreamState {
+
+        private int index;
+        private int line;
+        private int charPositionInLine;
+
+        public CharStreamState(CharStreamState state) {
+            this.index = state.index;
+            this.line = state.line;
+            this.charPositionInLine = state.charPositionInLine;
+        }
+
+        public CharStreamState() {
+            this.index = 0;
+            this.line = 1;
+            this.charPositionInLine = 0;
+        }
+
+        void copyState(CharStreamState state) {
+            this.index = state.index;
+            this.line = state.line;
+            this.charPositionInLine = state.charPositionInLine;
+        }
+
+        void accept(int ch) {
+            index++;
+            charPositionInLine++;
+            if (ch == '\n') {
+                line++;
+                charPositionInLine = 0;
+            }
+        }
+
+        int getIndex() {
+            return index;
+        }
+
+        @Override
+        public String toString() {
+            return "CharStreamState{" + "index=" + index + ", line=" + line + ", charPositionInLine=" + charPositionInLine + '}';
+        }
+    }// </editor-fold>
+
+    private final LexerInput input;
+    private final String name;
+    private CharStreamState currentState = new CharStreamState();
+    private List<CharStreamState> markers;
+    private int markDepth = 0;
+
+    public AntlrCharStream(LexerInput input, String name) {
+        this.input = input;
+        this.name = name;
+    }
+
+    /**
+     * Consume the current character, i.e. set the input stream and the index
+     * behind it.
+     */
+    @Override
+    public void consume() {
+        int ch = input.read();
+        currentState.accept(ch);
+    }
+
+    /**
+     * Read the character n positions ahead, then reset the stream to its
+     * current position.
+     *
+     * @param n The count to read ahead.
+     * @return The requested character
+     */
+    @Override
+    public int LA(int n) {
+        if (n == 0) {
+            return 0; // undefined
+        }
+        if (n < 0) {
+            System.err.println("==> LA(" + n + ") <==");
+        }
+        int ch = 0;
+        for (int i = 0; i < n; i++) {
+            ch = read();
+        }
+        input.backup(n);
+        return ch;
+    }
+
+    /**
+     * Save the current read position and its properties as a mark.
+     *
+     * @return
+     */
+    @Override
+    public int mark() {
+        if (markers == null) {
+            markers = new ArrayList<>();
+            markers.add(null); // depth 0 means no backtracking, leave blank
+        }
+        markDepth++;
+        CharStreamState state;
+        if (markDepth >= markers.size()) {
+            markers.add(new CharStreamState(currentState));
+        } else {
+            markers.get(markDepth).copyState(currentState);
+        }
+        return markDepth;
+    }
+
+    /**
+     * Remove some marks up to marker from the marker stack.
+     *
+     * @param marker
+     */
+    @Override
+    public void release(int marker) {
+        // unwind any other markers made after m and release m
+        markDepth = marker;
+        // release this marker
+        markDepth--;
+    }
+
+    /**
+     * Get the current position in stream.
+     *
+     * @return
+     */
+    @Override
+    public int index() {
+        return currentState.getIndex();
+    }
+
+    /**
+     * Set the stream position to the desired index.
+     *
+     * @param index
+     */
+    @Override
+    public void seek(int index) {
+        for (int i = markDepth; i > 0; i--) {
+            if (markers.get(i).getIndex() <= index) {
+                int b = index - markers.get(i).getIndex();
+                input.backup(index - markers.get(i).getIndex());
+                currentState.copyState(markers.get(i));
+                markDepth = i;
+                break;
+            }
+        }
+        // seek forward, consume until p hits index
+        while (currentState.getIndex() < index) {
+            consume();
+        }
+    }
+
+    /**
+     * Size of input stream cannot be determined here, so throw an
+     * UnsupportedOperationException.
+     *
+     * @return size of input stream.
+     */
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getSourceName() {
+        return name;
+    }
+
+    /**
+     * Get a text interval.
+     *
+     * @param intrvl
+     * @return
+     */
+    @Override
+    public String getText(Interval intrvl) {
+        int base = currentState.getIndex();
+//        base = 0;
+        int a = intrvl.a - base;
+        int b = intrvl.b - base + 1;
+        String text = input.readText(a, b).toString();
+        return text;
+    }
+
+    private int read() {
+        int result = input.read();
+        if (result == LexerInput.EOF) {
+            result = CharStream.EOF;
+        } else {
+            currentState.accept(result);
+        }
+        return result;
+    }
+}

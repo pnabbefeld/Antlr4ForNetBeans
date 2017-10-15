@@ -1,0 +1,18 @@
+<!DOCTYPE fontscolors PUBLIC "-//NetBeans//DTD Editor Fonts and Colors settings 1.1//EN" "http://www.netbeans.org/dtds/EditorFontsColors-1_1.dtd">
+<fontscolors>
+    <fontcolor name="action-content" default="default">
+        <font style="italic" />
+    </fontcolor>
+    <fontcolor name="character" default="char"/>
+    <fontcolor name="comment" default="comment"/>
+    <fontcolor name="identifier" default="identifier" waveUnderlined="806000" foreColor="806000"/>
+    <fontcolor name="keyword" default="keyword"/>
+    <fontcolor name="operator" default="operator"/>
+    <fontcolor name="reference" default="default" foreColor="009900"/>
+    <fontcolor name="special" default="default" foreColor="ff00ff">
+        <font style="bold" />
+    </fontcolor>
+    <fontcolor name="whitespace" default="whitespace"/>
+    <fontcolor name="default" default="default"/>
+    <fontcolor name="error" default="error"/>
+</fontscolors>
